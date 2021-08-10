@@ -1,5 +1,6 @@
 describe('User Auth - Registrations', function() {
   it('can sign up', function() {
+    cy.task('taskTruncateTables')
     cy.visit('/')
     cy.get('#signup-link').click()
     cy.get('#registrations-email').type('test@test.com')
