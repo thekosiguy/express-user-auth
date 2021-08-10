@@ -5,8 +5,8 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 const expressLayouts = require('express-ejs-layouts');
 
-const { User } = require('./models')
-
+const authenticator = require('./middleware/authenticator')
+const addCurrentUserAndErrors = require('./middleware/current-user-and-errors')
 const registrationsRouter = require('./routers/registrations.js')
 const sessionsRouter = require('./routers/sessions.js')
 
@@ -20,28 +20,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
 }))
-
-app.use(async (req, res, next) => {
-  if (req.session.userId) {
-    res.locals.currentUser = await User.findOne({
-      where: {
-        id: req.session.userId
-      }
-    })
-  } else {
-    res.locals.currentUser = undefined
-  }
-  res.locals.errors = []
-  next()
-})
-
-const authenticator = (req, res, next) => {
-  if (req.session.userId === undefined) {
-    res.redirect('/')
-  } else {
-    next()
-  }
-}
+app.use(addCurrentUserAndErrors)
 
 app.use('/registrations', registrationsRouter)
 app.use('/sessions', sessionsRouter)
